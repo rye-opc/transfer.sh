@@ -4,6 +4,41 @@
   var drop = document.getElementById('drop');
   var input = document.getElementById('file');
   var queue = document.getElementById('queue');
+  var loginBox = document.getElementById('login');
+  var loginForm = document.getElementById('login-form');
+  var loginMsg = document.getElementById('login-msg');
+  var session = document.getElementById('session');
+  var KEY = 'transfer.auth';
+
+  function loadAuth() {
+    try {
+      var raw = localStorage.getItem(KEY) || sessionStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+  function saveAuth(a, remember) {
+    clearAuth();
+    try { (remember ? localStorage : sessionStorage).setItem(KEY, JSON.stringify(a)); } catch (e) {}
+  }
+  function clearAuth() {
+    try { localStorage.removeItem(KEY); sessionStorage.removeItem(KEY); } catch (e) {}
+  }
+  function basic(a) {
+    return 'Basic ' + btoa(unescape(encodeURIComponent(a.user + ':' + a.pass)));
+  }
+
+  var auth = loadAuth();
+
+  function render(err) {
+    var on = !!auth;
+    loginBox.hidden = on;
+    drop.hidden = !on;
+    session.hidden = !on;
+    if (on) document.getElementById('who').textContent = auth.user;
+    loginMsg.hidden = !err;
+    loginMsg.textContent = err || '';
+    if (!on) document.getElementById(err ? 'pass' : 'user').focus();
+  }
 
   function fmtSize(n) {
     var u = ['B', 'KB', 'MB', 'GB', 'TB'], i = 0;
@@ -54,6 +89,9 @@
     var xhr = new XMLHttpRequest();
     var path = '/' + encodeURIComponent(file.name || 'pasted-file');
     xhr.open('PUT', path);
+    xhr.setRequestHeader('Authorization', basic(auth));
+    // Tells the server not to answer 401 with a browser login prompt.
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
     xhr.upload.onprogress = function (e) {
       if (e.lengthComputable) fill.style.width = (e.loaded / e.total * 100) + '%';
     };
@@ -79,7 +117,10 @@
           row.appendChild(d);
         }
       } else if (xhr.status === 401) {
-        fail('Login required or wrong credentials. Reload and try again.');
+        fail('Wrong username or password.');
+        auth = null; clearAuth();
+        // Stop the rest of the queue and ask again.
+        render('Wrong username or password. Sign in again to upload.');
       } else if (xhr.status === 413) {
         fail('File is too large.');
       } else {
@@ -90,8 +131,24 @@
   }
 
   function addFiles(list) {
+    if (!auth) return;
     for (var i = 0; i < list.length; i++) upload(list[i]);
   }
+
+  loginForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var user = document.getElementById('user').value.trim();
+    var pass = document.getElementById('pass').value;
+    if (!user || !pass) return;
+    auth = { user: user, pass: pass };
+    saveAuth(auth, document.getElementById('remember').checked);
+    document.getElementById('pass').value = '';
+    Array.prototype.forEach.call(queue.querySelectorAll('.item.error'), function (n) { n.remove(); });
+    render();
+  });
+  document.getElementById('logout').addEventListener('click', function () {
+    auth = null; clearAuth(); render();
+  });
 
   drop.addEventListener('click', function () { input.click(); });
   drop.addEventListener('keydown', function (e) {
@@ -114,6 +171,8 @@
     var files = e.clipboardData && e.clipboardData.files;
     if (files && files.length) addFiles(files);
   });
+
+  render();
 
   Array.prototype.forEach.call(document.querySelectorAll('[data-copy]'), function (box) {
     var btn = box.querySelector('.copy');
