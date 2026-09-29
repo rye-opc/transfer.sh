@@ -1,0 +1,23 @@
+{{.Hostname}}: file sharing from the command line
+===
+
+Upload:
+$ curl -u user:pass --upload-file ./hello.txt {{.WebAddress}}hello.txt
+
+Upload with limits:
+$ curl -H "Max-Downloads: 1" -H "Max-Days: 5" --upload-file ./hello.txt {{.WebAddress}}hello.txt
+
+Download:
+$ curl {{.WebAddress}}{{.SampleToken}}/hello.txt -o hello.txt
+
+Encrypt with gpg & upload:
+$ cat /tmp/hello.txt|gpg -ac -o-|curl -X PUT --upload-file "-" {{.WebAddress}}test.txt
+
+Download & decrypt with gpg:
+$ curl {{.WebAddress}}{{.SampleToken}}/test.txt|gpg -o- > /tmp/hello.txt
+
+Upload multiple files:
+$ curl -i -F filedata=@/tmp/hello.txt -F filedata=@/tmp/hello2.txt {{.WebAddress}}
+
+Shell function (.bashrc / .zshrc):
+transfer() { curl -n --progress-bar --upload-file "$1" "{{.WebAddress}}$(basename "$1")"; echo; }

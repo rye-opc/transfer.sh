@@ -36,6 +36,9 @@ COPY --from=build /tmp/empty /tmp
 COPY --from=build /tmp/useradd/* /etc/
 COPY --from=build --chown=${RUNAS}  /go/bin/transfersh /go/bin/transfersh
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+# Custom web UI (see web/). Served via --web-path instead of the embedded assets.
+COPY web /web
+ENV WEB_PATH=/web
 
 USER ${RUNAS}
 

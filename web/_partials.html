@@ -1,0 +1,40 @@
+{{define "head"}}<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="/favicon.ico">
+<link rel="stylesheet" href="/styles/app.css">{{end}}
+
+{{define "nav"}}<header class="nav">
+  <a class="brand" href="/"><span class="dot"></span>{{.Hostname}}</a>
+  <a class="nav-link" href="/#cli">CLI</a>
+</header>{{end}}
+
+{{define "footer"}}<footer class="foot">
+  <span>{{.Hostname}} &middot; powered by <a href="https://github.com/dutchcoders/transfer.sh">transfer.sh</a></span>
+</footer>{{end}}
+
+{{define "download-head"}}<main class="wrap narrow">
+  <h1 class="file-title" title="{{.Filename}}">{{.Filename}}</h1>
+  <p class="muted">{{.ContentType}} &middot; {{.ContentLength | format "#,###."}} bytes</p>
+  <div class="actions">
+    <a class="btn primary" href="{{.URLGet}}">Download</a>
+    <button class="btn" type="button" id="copy-link" data-url="{{.URL}}">Copy link</button>
+  </div>{{end}}
+
+{{define "download-tail"}}
+  <div class="card qr">
+    <img alt="QR code" width="150" height="150" src="data:image/png;base64,{{.QRCode}}">
+    <p class="muted">Scan to open on another device</p>
+  </div>
+  <details class="delete">
+    <summary>Delete this file</summary>
+    <div class="row">
+      <input type="text" id="deletion-token" placeholder="Deletion token" autocomplete="off" spellcheck="false">
+      <button class="btn danger" type="button" id="confirm-delete" data-url="{{.URL}}">Delete</button>
+    </div>
+    <p class="muted small">The token is returned in the <code>X-Url-Delete</code> header on upload.</p>
+    <p id="delete-msg" class="small" role="status"></p>
+  </details>
+</main>
+{{template "footer" .}}
+<script src="/scripts/download.js"></script>{{end}}

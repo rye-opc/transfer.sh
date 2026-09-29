@@ -290,9 +290,12 @@ func (s *Server) previewHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Read at most 5MB for the preview. The previous fixed 5MB buffer was
+		// rendered in full, padding every text preview with ~5MB of NUL bytes.
 		var data []byte
-		data = make([]byte, _5M)
-		if _, err = reader.Read(data); err != io.EOF && err != nil {
+		data, err = io.ReadAll(io.LimitReader(reader, _5M))
+		_ = reader.Close()
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

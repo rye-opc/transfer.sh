@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>{{.Hostname}} &middot; file sharing</title>
+<meta name="description" content="Share files with a link.">
+{{template "head" .}}
+</head>
+<body>
+{{template "nav" .}}
+<main class="wrap">
+  <section class="hero">
+    <h1>Share a file, get a link.</h1>
+    <p class="muted">
+      {{ if .MaxUploadSize }}Up to {{ .MaxUploadSize }} per file{{ else }}No size limit{{ end }}
+      &middot;
+      {{ if .PurgeTime }}kept for {{ .PurgeTime }}{{ else }}kept forever{{ end }}
+    </p>
+  </section>
+
+  <section id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files to upload">
+    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
+    <p><strong>Drop files here</strong> or <span class="link">browse</span></p>
+    <p class="muted small">You can also paste a file from the clipboard.</p>
+    <input id="file" type="file" multiple hidden>
+  </section>
+
+  <ul id="queue" class="queue" aria-live="polite"></ul>
+
+  <section id="cli" class="cli">
+    <h2>Command line</h2>
+    <div class="code" data-copy>
+      <pre>curl -u user:pass --upload-file ./hello.txt {{.WebAddress}}hello.txt
+{{.WebAddress}}{{.SampleToken}}/hello.txt</pre>
+      <button class="copy" type="button">Copy</button>
+    </div>
+    <p class="muted small">Store credentials in <code>~/.netrc</code> and use <code>curl -n</code>, or add a shell function:</p>
+    <div class="code" data-copy>
+      <pre>transfer() { curl -n --progress-bar --upload-file "$1" "{{.WebAddress}}$(basename "$1")"; echo; }</pre>
+      <button class="copy" type="button">Copy</button>
+    </div>
+    <details>
+      <summary>More examples</summary>
+      <div class="code" data-copy>
+        <pre># limits
+curl -H "Max-Downloads: 1" -H "Max-Days: 5" --upload-file ./hello.txt {{.WebAddress}}hello.txt
+
+# download
+curl {{.WebAddress}}{{.SampleToken}}/hello.txt -o hello.txt
+
+# encrypt with gpg before upload
+cat hello.txt | gpg -ac -o- | curl -n -X PUT --upload-file "-" {{.WebAddress}}test.txt
+
+# several files as one archive
+curl {{.WebAddress}}({{.SampleToken}}/hello.txt,{{.SampleToken2}}/world.txt).zip</pre>
+        <button class="copy" type="button">Copy</button>
+      </div>
+    </details>
+  </section>
+</main>
+{{template "footer" .}}
+<script src="/scripts/app.js"></script>
+</body>
+</html>

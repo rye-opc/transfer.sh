@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>{{.Filename}} &middot; {{.Hostname}}</title>
+{{template "head" .}}
+</head>
+<body>
+{{template "nav" .}}
+{{template "download-head" .}}
+  <div class="card preview"><img src="{{.URL}}" alt="{{.Filename}}"></div>
+{{template "download-tail" .}}
+</body>
+</html>
