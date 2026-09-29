@@ -17,7 +17,28 @@
     </p>
   </section>
 
-  <section id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files to upload">
+  <section id="login" class="card login" hidden>
+    <h2>Sign in to upload</h2>
+    <form id="login-form" autocomplete="on">
+      <label>Username
+        <input id="user" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+      </label>
+      <label>Password
+        <input id="pass" name="password" type="password" autocomplete="current-password" required>
+      </label>
+      <label class="check"><input id="remember" type="checkbox" checked> Remember me on this device</label>
+      <button class="btn primary" type="submit">Sign in</button>
+      <p id="login-msg" class="err" role="alert" hidden></p>
+    </form>
+    <p class="muted small">Downloads are public by link; only uploading needs a login.</p>
+  </section>
+
+  <div id="session" class="session" hidden>
+    <span class="muted small">Signed in as <strong id="who"></strong></span>
+    <button id="logout" class="linkbtn" type="button">Sign out</button>
+  </div>
+
+  <section id="drop" class="drop" tabindex="0" role="button" aria-label="Choose files to upload" hidden>
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7 9m5-5 5 5"/><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>
     <p><strong>Drop files here</strong> or <span class="link">browse</span></p>
     <p class="muted small">You can also paste a file from the clipboard.</p>

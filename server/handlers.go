@@ -1369,7 +1369,11 @@ func (s *Server) basicAuthHandler(h http.Handler) http.HandlerFunc {
 			s.authIPFilter = newIPFilter(s.authIPFilterOptions)
 		}
 
-		w.Header().Set("WWW-Authenticate", "Basic realm=\"Restricted\"")
+		// Don't trigger the browser's native login dialog for scripted requests
+		// (the web UI sends its own Authorization header from a login form).
+		if r.Header.Get("X-Requested-With") != "XMLHttpRequest" {
+			w.Header().Set("WWW-Authenticate", "Basic realm=\"Restricted\"")
+		}
 
 		var authorized bool
 		if s.authIPFilter != nil {
